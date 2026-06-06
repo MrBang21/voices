@@ -179,18 +179,91 @@ body {
 			gap: .5em;
 			margin-top: 1em;
 			flex-shrink: 0;
-			img {
-				width: 100%;
-				height: auto;
+			button {
+				padding: 0;
+				margin: 0;
+				border: none;
+				background: transparent;
 				border-radius: .5em;
-				object-fit: cover;
-				aspect-ratio: 1;
 				cursor: pointer;
-				transition: opacity .2s;
-				&:hover {
+				transition: opacity .2s, filter .3s;
+				&:hover:not(:disabled) {
 					opacity: .8;
 				}
+				&:disabled {
+					cursor: not-allowed;
+					user-select: none;
+				}
+				&.nsfw {
+					filter: blur(10px) contrast(0.2);
+					pointer-events: none;
+				}
+				img {
+					width: 100%;
+					height: auto;
+					border-radius: .5em;
+					object-fit: cover;
+					aspect-ratio: 1;
+					display: block;
+					user-select: none;
+					pointer-events: none;
+				}
 			}
+		}
+	}
+}
+
+body.nsfw .nsfw {
+	filter: none !important;
+	pointer-events: auto !important;
+}
+
+#nsfw-warning {
+	border: 1px solid var(--muted);
+	background: var(--card);
+	border-radius: 1em;
+	padding: 2em;
+	color: var(--text);
+	max-width: 400px;
+	box-shadow: 0 10px 30px var(--shadow);
+	text-align: center;
+
+	&::backdrop {
+		background: oklch(0 0 0 / .7);
+	}
+
+	h2 {
+		margin-top: 0;
+	}
+
+	p {
+		margin-bottom: 2em;
+	}
+
+	form {
+		display: flex;
+		gap: 1em;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	button {
+		background: var(--text);
+		color: var(--card);
+		border: none;
+		border-radius: 0.5em;
+		padding: 0.75em 1.5em;
+		font-size: 1.1rem;
+		font-weight: bold;
+		cursor: pointer;
+		transition: opacity 0.2s;
+
+		&:hover {
+			opacity: 0.8;
+		}
+
+		&#reject-nsfw {
+			background: var(--muted);
 		}
 	}
 }
@@ -253,6 +326,14 @@ body {
 	}
 }
 
+button {
+	&:focus,
+	&:focus-visible {
+		outline: 2px solid var(--accent, var(--text));
+		outline-offset: 2px;
+	}
+}
+
 @media (width > 700px) {
 	.post {
 		.card {
@@ -282,6 +363,13 @@ body {
 	</div>
 </template>
 
+<template id="image-template">
+	<!-- if the image is NSFW, add the nsfw class and disable the button as default unless has been accepted -->
+	<button class="">
+		<img src="" alt="">
+	</button>
+</template>
+
 <dialog id="lightbox" closedby="any">
 	<form method="dialog">
 		<button id="close" aria-label="Close lightbox" autofocus>&times;</button>
@@ -289,6 +377,15 @@ body {
 	<button id="prev" aria-label="Previous image">&lsaquo;</button>
 	<img id="image" src="" alt="Gallery Image">
 	<button id="next" aria-label="Next image">&rsaquo;</button>
+</dialog>
+
+<dialog id="nsfw-warning">
+	<h2>Content Warning</h2>
+	<p>Some images in this gallery contain sensitive or graphic content related to medical procedures or injuries. Do you want to reveal them?</p>
+	<form method="dialog">
+		<button id="reject-nsfw" autofocus>No</button>
+		<button id="accept-nsfw">Yes</button>
+	</form>
 </dialog>
 
 <svg style="display: none;">
@@ -308,10 +405,18 @@ body {
 
 <script>
 "use strict";
+
+let NSFW = {
+	show: false,
+	answered: false,
+	timeout: null
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
 	const
 		app = document.getElementById('app'),
-		template = document.getElementById('post-template');
+		template = document.getElementById('post-template'),
+		imageTemplate = document.getElementById('image-template');
 
 	fetch('data.json')
 		.then(response => response.json())
@@ -369,21 +474,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 			}
 
 			if (item.gallery && item.gallery.length > 0) {
-				item.gallery.slice(0, 4).forEach(src => {
-					const img = document.createElement('img');
-					img.src = src;
+				item.gallery.slice(0, 4).forEach(itemObj => {
+					const
+						url = typeof itemObj === 'string' ? itemObj : itemObj.url,
+						nsfw = typeof itemObj === 'string' ? false : !!itemObj.nsfw,
+						imgClone = imageTemplate.content.cloneNode(true),
+						btn = imgClone.querySelector('button'),
+						img = imgClone.querySelector('img');
+					img.src = url;
 					img.loading = 'lazy';
-					gallery.append(img);
+					if (nsfw) {
+						btn.classList.add('nsfw');
+						post.classList.add('has-nsfw');
+						if (!NSFW.show) {
+							btn.disabled = true;
+						}
+					}
+					gallery.append(imgClone);
 				});
 			}
 
 			app.append(clone);
 		});
 
+		const
+			dialogNSFW = document.getElementById('nsfw-warning'),
+			acceptNSFW = document.getElementById('accept-nsfw'),
+			rejectNSFW = document.getElementById('reject-nsfw');
+
+		acceptNSFW.addEventListener('click', () => {
+			NSFW.answered = true;
+			NSFW.show = true;
+			document.body.classList.add('nsfw');
+			document.querySelectorAll('.gallery button.nsfw').forEach(btn => btn.disabled = false);
+		});
+
+		rejectNSFW.addEventListener('click', () => {
+			NSFW.answered = true;
+		});
+
 		const observer = new IntersectionObserver((entries) => {
 			for (const entry of entries) {
 				if (entry.isIntersecting) {
 					history.replaceState(null, null, '#' + entry.target.id);
+					clearTimeout(NSFW.timeout);
+					if (!NSFW.answered && !!entry.target.querySelector('.nsfw') && !dialogNSFW.open) {
+						NSFW.timeout = setTimeout(() => {
+							if (!dialogNSFW.open) {
+								dialogNSFW.showModal();
+							}
+						}, 600);
+					}
 				}
 			}
 		}, {
@@ -442,12 +583,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	app.addEventListener('click', (e) => {
-		if (e.target.tagName === 'IMG' && e.target.closest('.gallery')) {
-			const
-				gallery = e.target.closest('.gallery'),
-				imgs = Array.from(gallery.querySelectorAll('img')),
-				idx = imgs.indexOf(e.target);
+		const btn = e.target.closest('button');
+		if (btn && btn.closest('.gallery')) {
+			const gallery = btn.closest('.gallery');
+			const btns = Array.from(gallery.querySelectorAll('button:not(:disabled)'));
+			const idx = btns.indexOf(btn);
 			if (idx > -1) {
+				const imgs = btns.map(b => b.querySelector('img'));
 				openLightbox(imgs, idx);
 			}
 		}
