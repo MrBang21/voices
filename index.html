@@ -265,7 +265,7 @@ body {
 <body>
 <div id="background">
 	<h1>Voices Against<br>Circumcision</h1>
-	<div>#MenDoComplain</div>
+	<div>#MenDoComplain #IfIWereABoy</div>
 </div>
 <main id="app"></main>
 
@@ -291,7 +291,6 @@ body {
 	<button id="next" aria-label="Next image">&rsaquo;</button>
 </dialog>
 
-
 <svg style="display: none;">
 	<symbol id="icon-female" viewBox="0 0 24 24">
 		<circle cx="12" cy="10" r="5"/>
@@ -312,8 +311,7 @@ body {
 document.addEventListener('DOMContentLoaded', async () => {
 	const
 		app = document.getElementById('app'),
-		template = document.getElementById('post-template'),
-		imageTemplate = document.getElementById('image-template');
+		template = document.getElementById('post-template');
 
 	fetch('data.json')
 		.then(response => response.json())
@@ -409,7 +407,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 		console.error('Error loading data:', err);
 	});
 
-	// Lightbox Logic
 	const
 		lightbox = document.getElementById('lightbox'),
 		image = document.getElementById('image'),
