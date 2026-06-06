@@ -1,0 +1,51 @@
+[
+	{
+		"id": "mrbang21",
+		"name": "MrBang21",
+		"gender": "male",
+		"profile": "https://x.com/mrbang21",
+		"xpicture": "https://unavatar.io/x/mrbang21",
+		"content": [
+			"I wasn't circumcised, since I wasn't born in a country where it's common.",
+			"The first time I heard about circumcision was in school, where one of my classmates had his glans exposed. We were all curious and asked him about it, and he said he was circumcised because of his religion and that it wasn't his choice to be circumcised. We all thought it was weird and unnecessary, as why a religion would dictate such a thing... I mean, didn't their god create him perfect? We never teased him for it, as we were all felt bad for him.",
+			"As I grew older, I started to learn more about the procedure and the potential consequences. I was shocked to find out that it can lead to a loss of sensitivity and other complications. I couldn't understand why anyone would choose to do this to their child without a very good reason... and I still can't find a good reason for it.",
+			"I've also heard from some of my friends who were circumcised later in life due to medical reasons, and they all said they regretted it and wished they had tried harder to avoid it."
+		],
+		"gallery": []
+	},
+	{
+		"id": "loremipsum132",
+		"name": "lorem ipsum",
+		"gender": "other",
+		"content": [
+			"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+			"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+		],
+		"picture": "",
+		"profile": "https://x.com/loremipsum132",
+		"gallery": [
+			"https://images.unsplash.com/photo-1549490349-8643362247b5?w=500",
+			"https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500",
+			"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500",
+			"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500"
+		]
+	},
+	{
+		"id": "anonymous132",
+		"name": "Anonymous Survivor",
+		"gender": "male",
+		"content": ["I was circumcised soon after birth. It is something that has bothered me deeply throughout my life, affecting my body image and sensitivity."],
+		"picture": "",
+		"profile": "",
+		"gallery": []
+	},
+	{
+		"id": "janedoe133",
+		"name": "Jane Doe",
+		"gender": "female",
+		"content": ["As a mother, I wasn't fully informed about the procedure when I consented for my son. I regret that decision every single day."],
+		"picture": "",
+		"profile": "https://x.com/janedoe",
+		"gallery": []
+	}
+]
